@@ -1,0 +1,31 @@
+version: '3.9'
+
+# docker-compose exec [имя контейнера] python manage.py [команда]
+
+
+services:
+  flask_app:
+    container_name: flask_app
+    build: .
+    ports:
+      - "8000:5000"
+    environment:
+      - FLASK_DEBUG=True
+      - DB_URL=postgresql://postgres:postgres@flask_db:5432/postgres
+    depends_on:
+      - flask_db
+  flask_db:
+    container_name: flask_db
+    image: postgres:alpine
+    ports:
+      - "5430:5432"
+    environment:
+      - POSTGRES_PASSWORD=postgres
+      - POSTGRES_USER=postgres
+      - POSTGRES_DB=postgres
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+
+volumes:
+  pgdata: {}
+    

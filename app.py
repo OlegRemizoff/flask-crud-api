@@ -1,5 +1,6 @@
-from flask import Flask, request, jsonify, make_response
+from flask import Flask, request, jsonify, make_response, render_template
 from flask_sqlalchemy import SQLAlchemy
+import json
 from os import environ
 
 app = Flask(__name__)
@@ -21,10 +22,20 @@ with app.app_context():
     db.create_all()
 
 
-# Что-то вроде домашней страницы
-@app.route('/', methods=['GET'])
-def test():
-  return make_response(jsonify({'message': 'test route'}), 200)
+# Добавление пользователя через форму
+@app.route('/', methods=['GET', 'POST'])
+def add_user():
+    if request.method == "POST":
+        email = request.form.get("email")
+        username = str(request.form.get("username"))
+        try:
+            new_user = User(username=username, email=email)
+            db.session.add(new_user)
+            db.session.commit()
+            return make_response(jsonify({'message': 'user created'}), 201)
+        except Exception:
+            return make_response(jsonify({'message': 'error creating user'}), 500)
+    return render_template('index.html')
 
 
 # Создание пользователя
@@ -61,7 +72,7 @@ def get_user(id):
     return make_response(jsonify({'message': 'error getting user'}), 500)
 
 
-# update a user
+# Обновление пользователя
 @app.route('/users/<int:id>', methods=['PUT'])
 def update_user(id):
   try:
@@ -89,3 +100,8 @@ def delete_user(id):
     return make_response(jsonify({'message': 'user not found'}), 404)
   except Exception:
     return make_response(jsonify({'message': 'error deleting user'}), 500)
+  
+
+
+
+
